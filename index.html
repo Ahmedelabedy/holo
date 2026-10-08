@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>رسالة هولو</title>
+<meta property="og:title" content="جايلك رسالة هولو ✦">
+<meta property="og:description" content="افتحها وشوف الشخصية بتقولك الرسالة">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;800&family=Readex+Pro:wght@300;400;600&display=swap">
+<style>
+/* Layout: one dark "projection room". Sender = form beside a live stage; receiver = the stage fills the screen. */
+:root{
+  --bg:#070B16; --panel:#0F172A; --line:#22304D; --fg:#E9EEF8; --muted:#9AA7C2;
+  --holo:#62E8E1; --holo-soft:rgba(98,232,225,.16); --warm:#F5AE63;
+  --display:"Baloo Bhaijaan 2","Readex Pro",system-ui,sans-serif;
+  --body:"Readex Pro",system-ui,"Segoe UI",Tahoma,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:28px 40px;display:flex;flex-direction:column;gap:24px}
+h1,h2{font-family:var(--display);font-weight:800;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(30px,5vw,44px)}
+.lede{margin:0;color:var(--muted);max-width:60ch}
+.eyebrow{font-size:13px;letter-spacing:.06em;color:var(--holo);font-weight:600}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:16px;min-width:0}
+label{font-size:14px;color:var(--muted);font-weight:600}
+.field{display:flex;flex-direction:column;gap:6px}
+input[type=text],textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 14px;width:100%;box-sizing:border-box}
+textarea{min-height:110px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--holo);outline-offset:2px}
+.count{font-size:12px;color:var(--muted);align-self:flex-end;font-variant-numeric:tabular-nums}
+.chars{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.chars button{font:inherit;background:var(--bg);color:var(--muted);border:2px solid var(--line);border-radius:16px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;min-height:96px}
+.chars button[aria-pressed=true]{border-color:var(--holo);color:var(--holo)}
+.chars svg{width:46px;height:54px}
+.btn{font:inherit;font-weight:600;border:none;border-radius:999px;min-height:48px;padding:0 22px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.primary{background:var(--holo);color:#04121A}
+.btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
+.btn.wa{background:var(--warm);color:#1A0E02}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.out{display:flex;flex-direction:column;gap:10px}
+.linkbox{font-family:ui-monospace,monospace;font-size:12px;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:10px;word-break:break-all;direction:ltr;text-align:left;color:var(--muted);user-select:all}
+.note{font-size:13px;color:var(--muted);margin:0}
+
+/* Stage: the projected character */
+.stage{position:relative;border-radius:24px;overflow:hidden;background:
+  radial-gradient(120% 70% at 50% 100%,#2A2018 0 38%,transparent 39%),
+  linear-gradient(#0B1222,#121A2C);min-height:460px;border:1px solid var(--line)}
+.stage.full{min-height:calc(100vh - 140px)}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage.cam{background:#000}
+.stage.cam .scan{opacity:.5}
+.bubble{position:absolute;top:22px;inset-inline:18px;background:#F4F7FD;color:#121826;border-radius:18px;padding:12px 16px;font-weight:600;font-size:17px;min-height:28px;white-space:pre-wrap;word-break:break-word;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.bubble small{display:block;font-weight:400;font-size:12px;color:#55607A;margin-bottom:2px}
+.pad{position:absolute;left:50%;bottom:22%;width:150px;height:30px;margin-left:-75px;border-radius:50%;border:2px solid var(--holo);box-shadow:0 0 24px var(--holo),inset 0 0 18px var(--holo-soft)}
+.beam{position:absolute;left:50%;bottom:calc(22% + 14px);width:190px;height:52%;margin-left:-95px;clip-path:polygon(32% 100%,68% 100%,100% 0,0 0);background:linear-gradient(to top,rgba(98,232,225,.28),rgba(98,232,225,0))}
+.figure{position:absolute;left:50%;bottom:calc(22% + 18px);width:140px;margin-left:-70px;color:var(--holo);filter:drop-shadow(0 0 10px rgba(98,232,225,.7));animation:float 3.2s ease-in-out infinite;opacity:.92}
+.figure svg{width:140px;height:166px;display:block}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(98,232,225,.06) 0 2px,transparent 2px 5px);pointer-events:none;mix-blend-mode:screen}
+.mouth{transition:transform .08s}
+.talking .mouth{animation:talk .22s ease-in-out infinite alternate}
+@keyframes float{50%{transform:translateY(-10px)}}
+@keyframes talk{from{transform:scaleY(.4)}to{transform:scaleY(1.6)}}
+.stage-actions{position:absolute;inset-inline:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+/* Pyramid mode: four mirrored copies for a DIY plastic pyramid */
+.pyramid{position:fixed;inset:0;background:#000;z-index:10;display:flex;align-items:center;justify-content:center}
+.pyr{position:relative;width:min(96vw,96vh);aspect-ratio:1;max-width:100%}
+.pyr .copy{position:absolute;width:30%;left:35%;color:var(--holo);filter:drop-shadow(0 0 8px rgba(98,232,225,.8))}
+.pyr .copy svg{width:100%;height:auto;display:block}
+.pyr .c0{bottom:2%}
+.pyr .c1{top:2%;transform:rotate(180deg)}
+.pyr .c2{top:35%;left:2%;transform:rotate(90deg)}
+.pyr .c3{top:35%;left:auto;right:2%;transform:rotate(-90deg)}
+.pyr .center{position:absolute;left:44%;top:44%;width:12%;aspect-ratio:1;border:1px solid #1E2A40}
+.close{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));inset-inline-end:12px;z-index:11}
+@media (prefers-reduced-motion:reduce){.figure,.talking .mouth{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <!-- Sender view -->
+  <section id="send" hidden>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div class="eyebrow">النسخة التجريبية الأولى</div>
+      <h1>اعمل رسالة هولو</h1>
+      <p class="lede">اختار شخصية واكتب رسالتك. هيطلعلك لينك تبعته على واتساب، واللي يفتحه يشوف الشخصية بتقولها.</p>
+    </div>
+    <div class="grid" style="margin-top:22px">
+      <form class="panel" id="form" novalidate>
+        <div class="field">
+          <span id="charsLabel" class="field-label" style="font-size:14px;color:var(--muted);font-weight:600">الشخصية</span>
+          <div class="chars" role="group" aria-labelledby="charsLabel" id="chars"></div>
+        </div>
+        <div class="field">
+          <label for="from">اسمك</label>
+          <input type="text" id="from" maxlength="30" value="أحمد" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="msg">رسالتك</label>
+          <textarea id="msg" maxlength="160">كل سنة وإنتي طيبة يا ماما، وحشتيني جدًا</textarea>
+          <span class="count" id="count">0 / 160</span>
+        </div>
+        <button class="btn primary" type="submit">اعمل اللينك</button>
+        <div class="out" id="out" hidden>
+          <div class="linkbox" id="link"></div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="copy">انسخ اللينك</button>
+            <a class="btn wa" id="wa" href="#" target="_blank" rel="noopener">ابعته على واتساب</a>
+          </div>
+          <p class="note" id="copied" role="status"></p>
+        </div>
+      </form>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+        <div class="stage" id="previewStage"></div>
+        <p class="note">ده شكلها عند اللي هيستقبلها. دوس على الشخصية عشان تسمعها.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Receiver view -->
+  <section id="recv" hidden>
+    <div class="stage full" id="recvStage"></div>
+    <div class="row" style="justify-content:center;margin-top:16px">
+      <button class="btn primary" type="button" id="cam">افتح الكاميرا</button>
+      <button class="btn ghost" type="button" id="toPyr">وضع الهرم البلاستيك</button>
+      <button class="btn ghost" type="button" id="reply">اعمل رسالة ترد بيها</button>
+    </div>
+  </section>
+</div>
+
+<div class="pyramid" id="pyramid" hidden>
+  <div class="pyr" id="pyr"></div>
+  <button class="btn ghost close" type="button" id="closePyr">رجوع</button>
+</div>
+
+<script>
+// The site's own address; the message rides after # as a plain token.
+const BASE = location.origin + location.pathname;
+
+const CHARS = {
+  n:{name:"نور",svg:`<svg viewBox="0 0 44 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="22" cy="16" r="12"/><circle cx="17.5" cy="14.5" r="1.6" fill="currentColor"/><circle cx="26.5" cy="14.5" r="1.6" fill="currentColor"/><ellipse class="mouth" cx="22" cy="21" rx="3" ry="1.4" style="transform-origin:22px 21px"/><path d="M8 50c0-10 6-17 14-17s14 7 14 17"/></svg>`},
+  b:{name:"بندق",svg:`<svg viewBox="0 0 44 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="5" width="26" height="22" rx="7"/><path d="M22 5V1"/><circle cx="22" cy="1" r="1"/><circle cx="17" cy="15" r="1.6" fill="currentColor"/><circle cx="27" cy="15" r="1.6" fill="currentColor"/><rect class="mouth" x="17" y="20" width="10" height="2.4" rx="1.2" style="transform-origin:22px 21px"/><path d="M11 50V36a6 6 0 0 1 6-6h10a6 6 0 0 1 6 6v14"/></svg>`},
+  s:{name:"سحاب",svg:`<svg viewBox="0 0 44 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 28a9 9 0 0 1 2-17 11 11 0 0 1 20 2 8 8 0 0 1 0 15z"/><circle cx="18" cy="18" r="1.6" fill="currentColor"/><circle cx="27" cy="18" r="1.6" fill="currentColor"/><ellipse class="mouth" cx="22.5" cy="23" rx="2.6" ry="1.2" style="transform-origin:22.5px 23px"/><path d="M14 36c0 6 3 10 8 14 5-4 8-8 8-14"/></svg>`}
+};
+
+// UTF-8 <-> base64url (letters, digits, - and _ only, so it survives as a plain #anchor)
+function enc(obj){
+  const bytes=new TextEncoder().encode(JSON.stringify(obj));
+  let s="";bytes.forEach(b=>s+=String.fromCharCode(b));
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function dec(t){
+  try{
+    let b=t.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
+    const s=atob(b);const bytes=Uint8Array.from(s,c=>c.charCodeAt(0));
+    const o=JSON.parse(new TextDecoder().decode(bytes));
+    if(!o||typeof o.m!=="string")return null;
+    return {c:CHARS[o.c]?o.c:"n",n:String(o.n||"").slice(0,30),m:o.m.slice(0,160)};
+  }catch(e){return null}
+}
+
+let current={c:"n",n:"",m:""};
+
+function buildStage(el,data,withActions){
+  el.innerHTML="";
+  const bubble=document.createElement("div");bubble.className="bubble";
+  const who=document.createElement("small");who.textContent=(CHARS[data.c].name)+(data.n?" جايبالك رسالة من "+data.n:"");
+  const txt=document.createElement("span");txt.textContent=data.m||"…";
+  bubble.append(who,txt);
+  const scan=document.createElement("div");scan.className="scan";
+  const beam=document.createElement("div");beam.className="beam";
+  const pad=document.createElement("div");pad.className="pad";
+  const fig=document.createElement("button");fig.type="button";fig.className="figure";
+  fig.style.cssText+="background:none;border:none;padding:0;cursor:pointer";
+  fig.setAttribute("aria-label","اسمع الرسالة");
+  fig.innerHTML=CHARS[data.c].svg;
+  fig.addEventListener("click",()=>speak(data,fig));
+  el.append(beam,pad,fig,scan,bubble);
+  if(withActions){
+    const a=document.createElement("div");a.className="stage-actions";
+    const b=document.createElement("button");b.type="button";b.className="btn primary";b.textContent="اسمع الرسالة";
+    b.addEventListener("click",()=>speak(data,fig));
+    if(!("speechSynthesis" in window))b.hidden=true;
+    a.append(b);el.append(a);
+  }
+}
+
+function speak(data,fig){
+  if(!("speechSynthesis" in window)||!data.m)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(data.m);
+  const voices=speechSynthesis.getVoices();
+  const v=voices.find(x=>/^ar[-_]EG/i.test(x.lang))||voices.find(x=>/^ar/i.test(x.lang));
+  if(v)u.voice=v;u.lang=v?v.lang:"ar-EG";u.rate=.95;
+  u.onstart=()=>fig.classList.add("talking");
+  u.onend=u.onerror=()=>fig.classList.remove("talking");
+  speechSynthesis.speak(u);
+}
+
+function linkFor(data){return (BASE||"")+"#h1."+enc(data)}
+
+function initSend(){
+  const chars=document.getElementById("chars");
+  Object.entries(CHARS).forEach(([k,v])=>{
+    const b=document.createElement("button");b.type="button";b.dataset.k=k;
+    b.setAttribute("aria-pressed",k===current.c?"true":"false");
+    b.innerHTML=v.svg+`<span>${v.name}</span>`;
+    b.addEventListener("click",()=>{current.c=k;chars.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.k===k?"true":"false"));refresh()});
+    chars.append(b);
+  });
+  const from=document.getElementById("from"),msg=document.getElementById("msg"),count=document.getElementById("count");
+  function refresh(){
+    current.n=from.value.trim();current.m=msg.value.trim();
+    count.textContent=msg.value.length+" / 160";
+    buildStage(document.getElementById("previewStage"),current,false);
+    document.getElementById("out").hidden=true;
+  }
+  from.addEventListener("input",refresh);msg.addEventListener("input",refresh);
+  document.getElementById("form").addEventListener("submit",e=>{
+    e.preventDefault();
+    if(!current.m){msg.focus();return}
+    const url=linkFor(current);
+    document.getElementById("link").textContent=url;
+    const text="جايلك رسالة هولو من "+(current.n||"حد بيحبك")+" ✦ افتحها هنا: "+url;
+    document.getElementById("wa").href="https://wa.me/?text="+encodeURIComponent(text);
+    document.getElementById("out").hidden=false;
+    document.getElementById("copied").textContent="";
+  });
+  document.getElementById("copy").addEventListener("click",()=>{
+    const url=document.getElementById("link").textContent,st=document.getElementById("copied");
+    navigator.clipboard.writeText(url).then(()=>{st.textContent="اتنسخ اللينك."}).catch(()=>{
+      const r=document.createRange();r.selectNodeContents(document.getElementById("link"));
+      const s=getSelection();s.removeAllRanges();s.addRange(r);
+      st.textContent="اللينك متحدد، انسخه من عندك.";
+    });
+  });
+  refresh();
+}
+
+function initRecv(data){
+  current=data;
+  buildStage(document.getElementById("recvStage"),data,true);
+  document.getElementById("reply").addEventListener("click",()=>{
+    try{history.replaceState(null,"",location.pathname+location.search)}catch(e){location.hash=""}
+    route();
+  });
+  document.getElementById("toPyr").addEventListener("click",openPyramid);
+  const camBtn=document.getElementById("cam");
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia))camBtn.hidden=true;
+  camBtn.addEventListener("click",toggleCam);
+}
+
+let camStream=null;
+async function toggleCam(){
+  const stage=document.getElementById("recvStage"),btn=document.getElementById("cam");
+  if(camStream){
+    camStream.getTracks().forEach(t=>t.stop());camStream=null;
+    const v=stage.querySelector("video");if(v)v.remove();
+    stage.classList.remove("cam");btn.textContent="افتح الكاميرا";return;
+  }
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+    const v=document.createElement("video");
+    v.setAttribute("playsinline","");v.muted=true;v.autoplay=true;v.srcObject=camStream;
+    stage.prepend(v);stage.classList.add("cam");
+    btn.textContent="اقفل الكاميرا";
+  }catch(e){
+    btn.textContent="الكاميرا مش متاحة";btn.disabled=true;
+  }
+}
+
+function openPyramid(){
+  const p=document.getElementById("pyr");p.innerHTML='<div class="center"></div>';
+  for(let i=0;i<4;i++){const d=document.createElement("div");d.className="copy c"+i;d.innerHTML=CHARS[current.c].svg;p.append(d)}
+  const box=document.getElementById("pyramid");box.hidden=false;
+  if(box.requestFullscreen)box.requestFullscreen().catch(()=>{});
+}
+document.getElementById("closePyr").addEventListener("click",()=>{
+  document.getElementById("pyramid").hidden=true;
+  if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
+});
+
+let sendReady=false;
+function route(){
+  const h=location.hash.slice(1);
+  const data=h.startsWith("h1.")?dec(h.slice(3)):null;
+  document.getElementById("send").hidden=!!data;
+  document.getElementById("recv").hidden=!data;
+  if(data)initRecv(data);
+  else if(!sendReady){sendReady=true;initSend()}
+}
+if("speechSynthesis" in window)speechSynthesis.getVoices();
+route();
+</script>
+
+</body>
+</html>
