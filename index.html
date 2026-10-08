@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>رسالة هولو</title>
 <meta property="og:title" content="جايلك رسالة هولو ✦">
-<meta property="og:description" content="افتحها وشوف الشخصية بتقولك الرسالة">
+<meta property="og:description" content="افتحها واسمع الشخصية بتقولك الرسالة بصوت صاحبها">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;800&family=Readex+Pro:wght@300;400;600&display=swap">
 <style>
@@ -47,6 +47,20 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
 .out{display:flex;flex-direction:column;gap:10px}
 .linkbox{font-family:ui-monospace,monospace;font-size:12px;background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:10px;word-break:break-all;direction:ltr;text-align:left;color:var(--muted);user-select:all}
 .note{font-size:13px;color:var(--muted);margin:0}
+.note:empty{display:none}
+.btn[disabled]{opacity:.6;cursor:wait}
+
+/* Recorder */
+.rec{display:flex;flex-direction:column;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px}
+.rec-btn{min-height:56px;font-size:17px}
+.rec-btn svg{width:22px;height:22px}
+.rec-btn.recording{background:#F26D6D;color:#1A0505}
+.rec-btn.recording svg{animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.rec-meta{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;direction:ltr}
+.meter{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--holo);transition:width .2s linear}
+#recMsg{color:var(--warm)}
 
 /* Stage: the projected character */
 .stage{position:relative;border-radius:24px;overflow:hidden;background:
@@ -89,9 +103,9 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
   <!-- Sender view -->
   <section id="send" hidden>
     <div style="display:flex;flex-direction:column;gap:8px">
-      <div class="eyebrow">النسخة التجريبية الأولى</div>
+      <div class="eyebrow">رسالة بصوتك</div>
       <h1>اعمل رسالة هولو</h1>
-      <p class="lede">اختار شخصية واكتب رسالتك. هيطلعلك لينك تبعته على واتساب، واللي يفتحه يشوف الشخصية بتقولها.</p>
+      <p class="lede">اختار شخصية وسجّل رسالتك بصوتك (لحد 20 ثانية). هيطلعلك لينك تبعته على واتساب، واللي يفتحه يشوف الشخصية بتقولها بصوتك.</p>
     </div>
     <div class="grid" style="margin-top:22px">
       <form class="panel" id="form" novalidate>
@@ -104,11 +118,26 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
           <input type="text" id="from" maxlength="30" value="أحمد" autocomplete="name">
         </div>
         <div class="field">
-          <label for="msg">رسالتك</label>
-          <textarea id="msg" maxlength="160">كل سنة وإنتي طيبة يا ماما، وحشتيني جدًا</textarea>
+          <span class="field-label" style="font-size:14px;color:var(--muted);font-weight:600">رسالتك بصوتك</span>
+          <div class="rec">
+            <button class="btn primary rec-btn" type="button" id="recBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+              <span id="recLabel">سجّل رسالتك</span>
+            </button>
+            <div class="row" id="recDone" hidden>
+              <button class="btn ghost" type="button" id="recPlay">اسمع التسجيل</button>
+              <button class="btn ghost" type="button" id="recAgain">سجّل تاني</button>
+            </div>
+            <div class="rec-meta"><span id="recTime">0:00</span><span class="meter"><i id="recBar"></i></span><span>0:20</span></div>
+          </div>
+          <p class="note" id="recMsg" role="status"></p>
+        </div>
+        <div class="field">
+          <label for="msg">سطر مكتوب يظهر في الفقاعة (اختياري)</label>
+          <textarea id="msg" maxlength="160" style="min-height:72px" placeholder="مثلًا: كل سنة وإنتي طيبة يا ماما"></textarea>
           <span class="count" id="count">0 / 160</span>
         </div>
-        <button class="btn primary" type="submit">اعمل اللينك</button>
+        <button class="btn primary" type="submit" id="make">اعمل اللينك</button>
         <div class="out" id="out" hidden>
           <div class="linkbox" id="link"></div>
           <div class="row">
@@ -120,7 +149,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
       </form>
       <div style="display:flex;flex-direction:column;gap:10px;min-width:0">
         <div class="stage" id="previewStage"></div>
-        <p class="note">ده شكلها عند اللي هيستقبلها. دوس على الشخصية عشان تسمعها.</p>
+        <p class="note">ده شكلها عند اللي هيستقبلها. وإنت بتسجل هتشوف بقها بيتحرك مع صوتك، وبعد التسجيل دوس على الشخصية عشان تسمعها.</p>
       </div>
     </div>
   </section>
@@ -142,8 +171,16 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
 </div>
 
 <script>
-// The site's own address; the message rides after # as a plain token.
+// The site's own address; a voice message rides after # as #v.<id>, old text messages as #h1.<token>.
 const BASE = location.origin + location.pathname;
+
+// Firebase project (public by design; access is limited by the Firestore rules).
+const FB = {project:"holo-message", key:"AIzaSyBO5DaB8IVMucj7KNnBtG5ddLsELpYcNC8"};
+const FS_DOCS = `projects/${FB.project}/databases/(default)/documents`;
+const FS_API = "https://firestore.googleapis.com/v1/" + FS_DOCS;
+
+const MAX_SEC = 20;          // recording limit
+const MAX_B64 = 700000;      // must match the rules' limit on field "a"
 
 const CHARS = {
   n:{name:"نور",svg:`<svg viewBox="0 0 44 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="22" cy="16" r="12"/><circle cx="17.5" cy="14.5" r="1.6" fill="currentColor"/><circle cx="26.5" cy="14.5" r="1.6" fill="currentColor"/><ellipse class="mouth" cx="22" cy="21" rx="3" ry="1.4" style="transform-origin:22px 21px"/><path d="M8 50c0-10 6-17 14-17s14 7 14 17"/></svg>`},
@@ -151,12 +188,7 @@ const CHARS = {
   s:{name:"سحاب",svg:`<svg viewBox="0 0 44 52" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 28a9 9 0 0 1 2-17 11 11 0 0 1 20 2 8 8 0 0 1 0 15z"/><circle cx="18" cy="18" r="1.6" fill="currentColor"/><circle cx="27" cy="18" r="1.6" fill="currentColor"/><ellipse class="mouth" cx="22.5" cy="23" rx="2.6" ry="1.2" style="transform-origin:22.5px 23px"/><path d="M14 36c0 6 3 10 8 14 5-4 8-8 8-14"/></svg>`}
 };
 
-// UTF-8 <-> base64url (letters, digits, - and _ only, so it survives as a plain #anchor)
-function enc(obj){
-  const bytes=new TextEncoder().encode(JSON.stringify(obj));
-  let s="";bytes.forEach(b=>s+=String.fromCharCode(b));
-  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
-}
+// Old text links: base64url JSON after #h1.
 function dec(t){
   try{
     let b=t.replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";
@@ -167,13 +199,126 @@ function dec(t){
   }catch(e){return null}
 }
 
+/* ---------- Firestore over REST (no SDK needed) ---------- */
+function newId(){
+  const abc="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const r=crypto.getRandomValues(new Uint8Array(20));
+  return Array.from(r,x=>abc[x%62]).join("");
+}
+async function saveMsg(msg){
+  const id=newId();
+  const body={writes:[{
+    update:{name:`${FS_DOCS}/messages/${id}`,fields:{
+      c:{stringValue:msg.c},n:{stringValue:msg.n},m:{stringValue:msg.m},
+      a:{stringValue:msg.a},t:{stringValue:msg.t},d:{doubleValue:msg.d}
+    }},
+    updateTransforms:[{fieldPath:"at",setToServerValue:"REQUEST_TIME"}],
+    currentDocument:{exists:false}
+  }]};
+  const r=await fetch(`${FS_API}:commit?key=${FB.key}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error("save "+r.status);
+  return id;
+}
+async function loadMsg(id){
+  const r=await fetch(`${FS_API}/messages/${id}?key=${FB.key}`);
+  if(r.status===404||r.status===403)return null;
+  if(!r.ok)throw new Error("load "+r.status);
+  const f=(await r.json()).fields||{};
+  const s=k=>(f[k]&&f[k].stringValue)||"";
+  if(!s("a"))return null;
+  return {c:CHARS[s("c")]?s("c"):"n",n:s("n").slice(0,30),m:s("m").slice(0,160),a:s("a"),t:s("t")};
+}
+
+/* ---------- Audio: base64 <-> Blob ---------- */
+function blobToB64(blob){
+  return new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(",")[1]||"");fr.onerror=bad;fr.readAsDataURL(blob)});
+}
+function b64ToBlob(b64,type){
+  const s=atob(b64),u=new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);
+  return new Blob([u],{type});
+}
+// AAC/MP4 plays on both iPhone and Android, so prefer it when the browser can record it.
+function pickMime(){
+  if(!window.MediaRecorder)return null;
+  const list=["audio/mp4;codecs=mp4a.40.2","audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"];
+  return list.find(t=>MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))||"";
+}
+
+/* ---------- Lip sync: the mouth follows the loudness ---------- */
+let ac=null;
+function getAC(){
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return null;
+  if(!ac){try{ac=new C()}catch(e){return null}}
+  if(ac.state==="suspended")ac.resume().catch(()=>{});
+  return ac;
+}
+const mouths=()=>document.querySelectorAll(".figure .mouth, #pyr .mouth");
+function driveMouth(analyser){
+  const buf=new Uint8Array(analyser.fftSize);let lvl=0,raf=0;
+  (function tick(){
+    analyser.getByteTimeDomainData(buf);
+    let sum=0;for(let i=0;i<buf.length;i++){const v=(buf[i]-128)/128;sum+=v*v}
+    const target=Math.min(1,Math.sqrt(sum/buf.length)*7);
+    lvl=target>lvl?target:lvl*.75+target*.25;
+    const sc=(.35+lvl*1.9).toFixed(2);
+    mouths().forEach(m=>m.style.transform=`scaleY(${sc})`);
+    raf=requestAnimationFrame(tick);
+  })();
+  return ()=>{cancelAnimationFrame(raf);mouths().forEach(m=>m.style.transform="")};
+}
+
+let stopPlayback=()=>{};
+function playVoice(data){
+  stopPlayback();
+  const url=URL.createObjectURL(data.blob||b64ToBlob(data.a,data.t));
+  const audio=new Audio();audio.setAttribute("playsinline","");audio.src=url;
+  const ctx=getAC();let stopMouth=null;
+  if(ctx){
+    try{
+      const src=ctx.createMediaElementSource(audio),an=ctx.createAnalyser();an.fftSize=1024;
+      src.connect(an);an.connect(ctx.destination);
+      stopMouth=driveMouth(an);
+    }catch(e){}
+  }
+  // Without Web Audio, fall back to the plain talking animation.
+  const figs=document.querySelectorAll(".figure, #pyr .copy");
+  if(!stopMouth){stopMouth=()=>{};figs.forEach(f=>f.classList.add("talking"))}
+  const end=()=>{stopMouth();figs.forEach(f=>f.classList.remove("talking"));URL.revokeObjectURL(url)};
+  stopPlayback=()=>{audio.pause();end();stopPlayback=()=>{}};
+  audio.onended=()=>stopPlayback();
+  audio.onerror=()=>{stopPlayback();showPlayError()};
+  audio.play().catch(()=>{stopPlayback();showPlayError()});
+}
+function showPlayError(){
+  const t=document.querySelector("#recv:not([hidden]) .bubble span, #send:not([hidden]) .bubble span");
+  if(t)t.textContent="الصوت مش راضي يشتغل على الجهاز ده. جرب تفتح اللينك من Chrome أو Safari.";
+}
+
+function speak(data){
+  if(!("speechSynthesis" in window)||!data.m)return;
+  stopPlayback();speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(data.m);
+  const voices=speechSynthesis.getVoices();
+  const v=voices.find(x=>/^ar[-_]EG/i.test(x.lang))||voices.find(x=>/^ar/i.test(x.lang));
+  if(v)u.voice=v;u.lang=v?v.lang:"ar-EG";u.rate=.95;
+  const figs=()=>document.querySelectorAll(".figure, #pyr .copy");
+  u.onstart=()=>figs().forEach(f=>f.classList.add("talking"));
+  u.onend=u.onerror=()=>figs().forEach(f=>f.classList.remove("talking"));
+  speechSynthesis.speak(u);
+}
+function play(data){ if(data.a||data.blob)playVoice(data); else speak(data); }
+const canPlay=data=>!!(data.a||data.blob)||("speechSynthesis" in window&&!!data.m);
+
 let current={c:"n",n:"",m:""};
 
 function buildStage(el,data,withActions){
   el.innerHTML="";
   const bubble=document.createElement("div");bubble.className="bubble";
   const who=document.createElement("small");who.textContent=(CHARS[data.c].name)+(data.n?" جايبالك رسالة من "+data.n:"");
-  const txt=document.createElement("span");txt.textContent=data.m||"…";
+  const txt=document.createElement("span");
+  txt.textContent=data.m||(data.a||data.blob?"عندي ليك رسالة بصوت"+(data.n?" "+data.n:"")+" ✦":"…");
   bubble.append(who,txt);
   const scan=document.createElement("div");scan.className="scan";
   const beam=document.createElement("div");beam.className="beam";
@@ -182,30 +327,22 @@ function buildStage(el,data,withActions){
   fig.style.cssText+="background:none;border:none;padding:0;cursor:pointer";
   fig.setAttribute("aria-label","اسمع الرسالة");
   fig.innerHTML=CHARS[data.c].svg;
-  fig.addEventListener("click",()=>speak(data,fig));
+  fig.addEventListener("click",()=>play(data));
   el.append(beam,pad,fig,scan,bubble);
   if(withActions){
     const a=document.createElement("div");a.className="stage-actions";
     const b=document.createElement("button");b.type="button";b.className="btn primary";b.textContent="اسمع الرسالة";
-    b.addEventListener("click",()=>speak(data,fig));
-    if(!("speechSynthesis" in window))b.hidden=true;
+    b.addEventListener("click",()=>play(data));
+    if(!canPlay(data))b.hidden=true;
     a.append(b);el.append(a);
   }
 }
 
-function speak(data,fig){
-  if(!("speechSynthesis" in window)||!data.m)return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(data.m);
-  const voices=speechSynthesis.getVoices();
-  const v=voices.find(x=>/^ar[-_]EG/i.test(x.lang))||voices.find(x=>/^ar/i.test(x.lang));
-  if(v)u.voice=v;u.lang=v?v.lang:"ar-EG";u.rate=.95;
-  u.onstart=()=>fig.classList.add("talking");
-  u.onend=u.onerror=()=>fig.classList.remove("talking");
-  speechSynthesis.speak(u);
-}
+function linkFor(id){return (BASE||"")+"#v."+id}
 
-function linkFor(data){return (BASE||"")+"#h1."+enc(data)}
+/* ---------- Sender ---------- */
+const rec={blob:null,type:"",dur:0,ver:0};   // the current recording; ver bumps on each new take
+let saved=null;                              // {key,url} of the last upload, to avoid re-uploading
 
 function initSend(){
   const chars=document.getElementById("chars");
@@ -217,19 +354,92 @@ function initSend(){
     chars.append(b);
   });
   const from=document.getElementById("from"),msg=document.getElementById("msg"),count=document.getElementById("count");
+  const recBtn=document.getElementById("recBtn"),recLabel=document.getElementById("recLabel"),recTime=document.getElementById("recTime");
+  const recBar=document.getElementById("recBar"),recDone=document.getElementById("recDone"),recMsg=document.getElementById("recMsg");
+  const makeBtn=document.getElementById("make");
+
   function refresh(){
     current.n=from.value.trim();current.m=msg.value.trim();
+    current.blob=rec.blob;
     count.textContent=msg.value.length+" / 160";
     buildStage(document.getElementById("previewStage"),current,false);
     document.getElementById("out").hidden=true;
   }
   from.addEventListener("input",refresh);msg.addEventListener("input",refresh);
-  document.getElementById("form").addEventListener("submit",e=>{
+
+  const fmt=s=>"0:"+String(Math.floor(s)).padStart(2,"0");
+  let mr=null,stream=null,timer=0,t0=0,stopMeter=()=>{};
+
+  async function startRec(){
+    recMsg.textContent="";
+    const mime=pickMime();
+    if(mime===null||!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
+      recMsg.textContent="المتصفح ده مش بيعرف يسجل. افتح الصفحة في Chrome أو Safari (مش من جوه واتساب).";return;
+    }
+    const ctx=getAC();   // created inside the tap, so iPhone allows it
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}});
+    }catch(e){
+      recMsg.textContent="مش قادرين نوصل للمايك. اسمح للموقع يستخدم المايك، ولو فاتح من جوه واتساب افتح اللينك في Chrome أو Safari.";return;
+    }
+    stopPlayback();
+    const chunks=[];
+    try{mr=new MediaRecorder(stream,Object.assign({audioBitsPerSecond:32000},mime?{mimeType:mime}:{}))}
+    catch(e){mr=new MediaRecorder(stream)}
+    mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    mr.onstop=()=>{
+      clearInterval(timer);stopMeter();stopMeter=()=>{};
+      stream.getTracks().forEach(t=>t.stop());
+      const dur=Math.min(MAX_SEC,(Date.now()-t0)/1000);
+      let type=(mr.mimeType||mime||"audio/webm").split(";")[0];
+      if(!/^audio\//.test(type))type="audio/"+(type.split("/")[1]||"webm");
+      recBtn.classList.remove("recording");recLabel.textContent="سجّل رسالتك";
+      if(dur<1||!chunks.length){recMsg.textContent="التسجيل قصير أوي، جرب تاني.";return}
+      rec.blob=new Blob(chunks,{type});rec.type=(mr.mimeType||type);rec.dur=Math.round(dur*10)/10;rec.ver++;
+      if(!/^audio\//.test(rec.type))rec.type=type;
+      recDone.hidden=false;recBtn.hidden=true;
+      recTime.textContent=fmt(rec.dur);
+      refresh();
+    };
+    mr.start(250);t0=Date.now();
+    recBtn.classList.add("recording");recLabel.textContent="وقّف التسجيل";
+    recTime.textContent=fmt(0);recBar.style.width="0%";
+    timer=setInterval(()=>{
+      const s=(Date.now()-t0)/1000;
+      recTime.textContent=fmt(Math.min(s,MAX_SEC));recBar.style.width=Math.min(100,s/MAX_SEC*100)+"%";
+      if(s>=MAX_SEC&&mr.state==="recording")mr.stop();
+    },200);
+    // Let the preview character mouth along while recording.
+    if(ctx){try{const src=ctx.createMediaStreamSource(stream),an=ctx.createAnalyser();an.fftSize=1024;src.connect(an);stopMeter=driveMouth(an)}catch(e){}}
+  }
+  recBtn.addEventListener("click",()=>{
+    if(mr&&mr.state==="recording")mr.stop(); else startRec();
+  });
+  document.getElementById("recPlay").addEventListener("click",()=>play(current));
+  document.getElementById("recAgain").addEventListener("click",()=>{
+    stopPlayback();rec.blob=null;rec.ver++;recDone.hidden=true;recBtn.hidden=false;
+    recTime.textContent=fmt(0);recBar.style.width="0%";refresh();startRec();
+  });
+
+  document.getElementById("form").addEventListener("submit",async e=>{
     e.preventDefault();
-    if(!current.m){msg.focus();return}
-    const url=linkFor(current);
+    if(!rec.blob){recMsg.textContent="سجّل رسالتك الأول.";recBtn.focus();return}
+    const key=JSON.stringify([rec.ver,current.c,current.n,current.m]);
+    let url=saved&&saved.key===key?saved.url:null;
+    if(!url){
+      makeBtn.disabled=true;makeBtn.textContent="بنرفع التسجيل…";recMsg.textContent="";
+      try{
+        const a=await blobToB64(rec.blob);
+        if(a.length>MAX_B64)throw new Error("big");
+        const id=await saveMsg({c:current.c,n:current.n,m:current.m,a,t:rec.type.slice(0,60),d:rec.dur});
+        url=linkFor(id);saved={key,url};
+      }catch(err){
+        recMsg.textContent=err.message==="big"?"التسجيل حجمه كبير، سجّل رسالة أقصر شوية.":"حصلت مشكلة في الرفع. اتأكد من النت وجرب تاني.";
+        return;
+      }finally{makeBtn.disabled=false;makeBtn.textContent="اعمل اللينك"}
+    }
     document.getElementById("link").textContent=url;
-    const text="جايلك رسالة هولو من "+(current.n||"حد بيحبك")+" ✦ افتحها هنا: "+url;
+    const text="جايلك رسالة هولو بصوت "+(current.n||"حد بيحبك")+" ✦ افتحها هنا: "+url;
     document.getElementById("wa").href="https://wa.me/?text="+encodeURIComponent(text);
     document.getElementById("out").hidden=false;
     document.getElementById("copied").textContent="";
@@ -245,10 +455,14 @@ function initSend(){
   refresh();
 }
 
+/* ---------- Receiver ---------- */
+let recvReady=false;
 function initRecv(data){
   current=data;
-  buildStage(document.getElementById("recvStage"),data,true);
+  buildStage(document.getElementById("recvStage"),data,!data.loading&&!data.error);
+  if(recvReady)return;recvReady=true;
   document.getElementById("reply").addEventListener("click",()=>{
+    stopPlayback();
     try{history.replaceState(null,"",location.pathname+location.search)}catch(e){location.hash=""}
     route();
   });
@@ -281,6 +495,7 @@ function openPyramid(){
   const p=document.getElementById("pyr");p.innerHTML='<div class="center"></div>';
   for(let i=0;i<4;i++){const d=document.createElement("div");d.className="copy c"+i;d.innerHTML=CHARS[current.c].svg;p.append(d)}
   const box=document.getElementById("pyramid");box.hidden=false;
+  p.onclick=()=>{if(canPlay(current))play(current)};
   if(box.requestFullscreen)box.requestFullscreen().catch(()=>{});
 }
 document.getElementById("closePyr").addEventListener("click",()=>{
@@ -288,14 +503,24 @@ document.getElementById("closePyr").addEventListener("click",()=>{
   if(document.fullscreenElement&&document.exitFullscreen)document.exitFullscreen().catch(()=>{});
 });
 
+
 let sendReady=false;
-function route(){
+async function route(){
   const h=location.hash.slice(1);
-  const data=h.startsWith("h1.")?dec(h.slice(3)):null;
+  let data=null;
+  if(h.startsWith("h1."))data=dec(h.slice(3));
+  else if(/^v\.[A-Za-z0-9]{20}$/.test(h))data={c:"n",n:"",m:"بنجيب الرسالة…",loading:true};
   document.getElementById("send").hidden=!!data;
   document.getElementById("recv").hidden=!data;
-  if(data)initRecv(data);
-  else if(!sendReady){sendReady=true;initSend()}
+  if(!data){if(!sendReady){sendReady=true;initSend()}return}
+  initRecv(data);
+  if(!data.loading)return;
+  try{
+    const msg=await loadMsg(h.slice(2));
+    initRecv(msg||{c:"n",n:"",m:"الرسالة دي مش موجودة. اتأكد إن اللينك كامل.",error:true});
+  }catch(e){
+    initRecv({c:"n",n:"",m:"مش قادرين نجيب الرسالة. اتأكد من النت وافتح اللينك تاني.",error:true});
+  }
 }
 if("speechSynthesis" in window)speechSynthesis.getVoices();
 route();
