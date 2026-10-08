@@ -121,6 +121,41 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
 .m-teta .bang{opacity:calc(var(--lvl)*3 - .4)}
 @keyframes wag{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
 .ch .arm-l,.ch .arm-r,.m-happy .rig{transition:transform .12s}
+/* Comedy layer */
+.figure svg{transform-origin:50% 92%}
+.fxl{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
+.burst{position:absolute;font-family:var(--display);font-weight:800;font-size:26px;line-height:1.15;color:#fff;width:max-content;max-width:78%;text-align:center;
+  text-shadow:3px 0 #1a1030,-3px 0 #1a1030,0 3px #1a1030,0 -3px #1a1030,2px 2px #1a1030,-2px -2px #1a1030,2px -2px #1a1030,-2px 2px #1a1030,0 6px 0 rgba(0,0,0,.35);
+  animation:pop 1.5s cubic-bezier(.2,1.6,.4,1) forwards}
+.burst.big{font-size:36px;color:#ffe14d}
+.emo{position:absolute;bottom:22%;font-size:32px;animation:flyup 2.1s ease-out both}
+.throw{position:absolute;left:50%;top:48%;font-size:42px;animation:throwit 1.2s ease-in forwards}
+.stage.shake{animation:quake .45s}
+.boing svg,.reacts .boing{animation:boing .5s}
+.gag-happy svg,.end-happy svg{animation:twirl .9s}
+.gag-sad svg,.end-sad svg{animation:honk 1s}
+.gag-angry svg{animation:stomp .9s}
+.end-angry svg{animation:blowup .9s}
+.gag-dizzy svg{animation:hic .6s}
+.end-dizzy svg{animation:faint 2.6s}
+.gag-teta svg,.end-teta svg{animation:windup .8s}
+@keyframes pop{0%{transform:translateX(-50%) rotate(var(--r)) scale(0)}16%{transform:translateX(-50%) rotate(var(--r)) scale(1.2)}28%{transform:translateX(-50%) rotate(var(--r)) scale(1)}80%{opacity:1}100%{transform:translateX(-50%) rotate(var(--r)) translateY(-30px);opacity:0}}
+@keyframes flyup{from{transform:translate(0,0) scale(.4);opacity:1}to{transform:translate(var(--dx),-360px) scale(1.3) rotate(25deg);opacity:0}}
+@keyframes throwit{from{transform:translate(-50%,0) scale(.3) rotate(0)}to{transform:translate(-50%,-30%) scale(8) rotate(540deg);opacity:.15}}
+@keyframes quake{20%{transform:translate(-8px,4px) rotate(-1deg)}40%{transform:translate(7px,-5px) rotate(1deg)}60%{transform:translate(-6px,3px)}80%{transform:translate(5px,-2px)}}
+@keyframes boing{30%{transform:scale(1.25,.8)}60%{transform:scale(.9,1.15)}}
+@keyframes twirl{to{transform:rotateY(360deg)}}
+@keyframes honk{20%,60%{transform:scale(1.08,.94)}40%,80%{transform:scale(.96,1.05)}}
+@keyframes stomp{20%{transform:translateY(-16px)}35%{transform:translateY(4px) scale(1.06,.92)}50%{transform:translateY(-10px)}65%{transform:translateY(2px)}}
+@keyframes blowup{40%{transform:scale(1.4);filter:brightness(1.8)}}
+@keyframes hic{30%{transform:translateY(-22px) rotate(-6deg)}}
+@keyframes faint{20%,85%{transform:rotate(85deg) translate(10px,30px)}}
+@keyframes windup{30%{transform:rotate(-10deg) translateX(-6px)}60%{transform:rotate(7deg)}}
+.reacts{display:flex;gap:8px;justify-content:center;margin-top:12px}
+.reacts button{font-size:24px;width:52px;height:52px;border-radius:50%;background:var(--panel);border:1px solid var(--line);cursor:pointer}
+.fxs{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.fxs button{font:inherit;font-size:14px;white-space:nowrap;border-radius:999px;border:2px solid var(--line);background:var(--panel);color:var(--fg);padding:6px 12px;min-height:40px;cursor:pointer}
+.fxs button[aria-pressed=true]{border-color:var(--holo);color:var(--holo)}
 @keyframes float{50%{transform:translateY(-10px)}}
 @keyframes talk{from{transform:scaleY(.4)}to{transform:scaleY(1.6)}}
 .stage-actions{position:absolute;inset-inline:16px;bottom:16px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
@@ -136,7 +171,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
 .pyr .c3{top:35%;left:auto;right:2%;transform:rotate(-90deg)}
 .pyr .center{position:absolute;left:44%;top:44%;width:12%;aspect-ratio:1;border:1px solid #1E2A40}
 .close{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));inset-inline-end:12px;z-index:11}
-@media (prefers-reduced-motion:reduce){.figure,.ch *{animation:none!important}}
+@media (prefers-reduced-motion:reduce){.figure,.figure svg,.ch *,.stage{animation:none!important}}
 </style>
 </head>
 <body>
@@ -170,6 +205,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
               <button class="btn ghost" type="button" id="recPlay">اسمع التسجيل</button>
               <button class="btn ghost" type="button" id="recAgain">سجّل تاني</button>
             </div>
+            <div class="fxs" id="fxs" role="group" aria-label="غيّر صوتك"></div>
             <div class="rec-meta"><span id="recTime">0:00</span><span class="meter"><i id="recBar"></i></span><span>0:20</span></div>
           </div>
           <p class="note" id="recMsg" role="status"></p>
@@ -199,6 +235,7 @@ input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{
   <!-- Receiver view -->
   <section id="recv" hidden>
     <div class="stage full" id="recvStage"></div>
+    <div class="reacts" id="reacts" aria-label="ريأكشن"><button type="button">😂</button><button type="button">💀</button><button type="button">🔥</button><button type="button">😭</button><button type="button">🩴</button></div>
     <div class="row" style="justify-content:center;margin-top:16px">
       <button class="btn primary" type="button" id="cam">افتح الكاميرا</button>
       <button class="btn ghost" type="button" id="toPyr">وضع الهرم البلاستيك</button>
@@ -361,7 +398,8 @@ async function loadMsg(id){
   const f=(await r.json()).fields||{};
   const s=k=>(f[k]&&f[k].stringValue)||"";
   if(!s("a"))return null;
-  return {c:charKey(s("c")),n:s("n").slice(0,30),m:s("m").slice(0,160),a:s("a"),t:s("t")};
+  const cm=s("c").match(/^([a-z]+)(\d?)$/)||[];
+  return {c:charKey(cm[1]),fx:+cm[2]||0,n:s("n").slice(0,30),m:s("m").slice(0,160),a:s("a"),t:s("t")};
 }
 
 /* ---------- Audio: base64 <-> Blob ---------- */
@@ -391,37 +429,105 @@ function getAC(){
 }
 const figs=()=>document.querySelectorAll(".figure, #pyr .copy");
 function setLvl(v){figs().forEach(f=>v?f.style.setProperty("--lvl",v):f.style.removeProperty("--lvl"))}
-function driveMouth(analyser){
+function driveMouth(analyser,onLvl){
   const buf=new Uint8Array(analyser.fftSize);let lvl=0,raf=0;
   (function tick(){
     analyser.getByteTimeDomainData(buf);
     let sum=0;for(let i=0;i<buf.length;i++){const v=(buf[i]-128)/128;sum+=v*v}
     const target=Math.min(1,Math.sqrt(sum/buf.length)*7);
     lvl=target>lvl?target:lvl*.75+target*.25;
-    setLvl(lvl.toFixed(3));
+    setLvl(lvl.toFixed(3));if(onLvl)onLvl(lvl);
     raf=requestAnimationFrame(tick);
   })();
   return ()=>{cancelAnimationFrame(raf);setLvl(0)};
 }
+
+/* ---------- Comedy: voice effects, shout reactions, idle gags, finale ---------- */
+// Voice effects. The chosen one rides on the character key as a digit ("angry2"), so the rules need no change.
+const FX=[{n:"عادي",i:"🙂"},{n:"سنجاب",i:"🐿️",rate:1.5},{n:"وحش",i:"👹",rate:.68},{n:"روبوت",i:"🤖",robot:1},{n:"صدى",i:"🏔️",echo:1}];
+const GAGS={
+  happy:{shout:["هيييه!","يا نهار فل!","😍😍"],emo:["💖","✨","🎉"],idle:["يااااي 💃","لالالا 🎶"],end:"باي باي 💕",endEmo:["🎉","🎊","💖"]},
+  sad:{shout:["محدش بيحبني!","لييييه كده 😭","قلبي اتكسر 💔"],emo:["😭","💧","💔"],idle:["*بيتمخط* 🤧","أنا وحيد 🥲"],end:"خلاص سيبوني 😭",endEmo:["💧","😭","💔"]},
+  angry:{shout:["أنا هتجنن!","والله ما هسيبك!","💢 اسكت 💢"],emo:["💢","🔥","😤"],idle:["إنت بتستعبط؟!","بتبصلي كده ليه؟"],end:"خلصت كلامي!",endEmo:["💥","🔥","💢"]},
+  dizzy:{shout:["الأرض بتلف!","مين أنا؟","هِك!"],emo:["😵‍💫","⭐","🌀"],idle:["هِك!","أنا فين؟"],end:"تصبحوا على خير 💤",endEmo:["💤","⭐","🌀"]},
+  teta:{shout:["يا واد!","هقول لأبوك!","إنت خسيت ليه كده؟!"],emo:["🩴","❗","🍲"],idle:["كُل يا حبيبي 🍲","البس تقيل 🧣"],end:"يلا روح ذاكر!",endEmo:["🩴","📚","🍲"]}
+};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const activeStage=()=>document.querySelector("#recv:not([hidden]) .stage, #send:not([hidden]) #previewStage");
+function fxLayer(stage){let l=stage.querySelector(".fxl");if(!l){l=document.createElement("div");l.className="fxl";stage.append(l)}return l}
+function anim(el,cls,ms){if(!el)return;el.classList.remove(cls);void el.getBoundingClientRect();el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),ms)}
+function burst(stage,text,big){
+  const s=document.createElement("span");s.className="burst"+(big?" big":"");s.textContent=text;
+  s.style.left=(38+Math.random()*24)+"%";s.style.top=(22+Math.random()*28)+"%";s.style.setProperty("--r",(Math.random()*24-12).toFixed(1)+"deg");
+  fxLayer(stage).append(s);setTimeout(()=>s.remove(),1500);
+}
+function emojis(stage,list,n){
+  for(let i=0;i<n;i++){
+    const s=document.createElement("span");s.className="emo";s.textContent=pick(list);
+    s.style.left=(8+Math.random()*80)+"%";s.style.setProperty("--dx",(Math.random()*90-45).toFixed(0)+"px");s.style.animationDelay=(Math.random()*.5).toFixed(2)+"s";
+    fxLayer(stage).append(s);setTimeout(()=>s.remove(),2600);
+  }
+}
+function throwAt(stage,e){const s=document.createElement("span");s.className="throw";s.textContent=e;fxLayer(stage).append(s);setTimeout(()=>s.remove(),1200)}
+function gag(stage,k){
+  const g=GAGS[k];if(!g)return;
+  anim(stage.querySelector(".figure"),"gag-"+k,1100);burst(stage,pick(g.idle));
+  if(k==="teta")throwAt(stage,"🩴");
+}
+function shout(stage,k){
+  const g=GAGS[k];if(!g)return;
+  anim(stage,"shake",450);anim(stage.querySelector(".figure"),"boing",500);
+  burst(stage,pick(g.shout),true);emojis(stage,g.emo,5);
+  if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}
+}
+function finale(stage,k){
+  const g=GAGS[k];if(!g)return;
+  burst(stage,g.end,true);emojis(stage,g.endEmo,10);
+  anim(stage.querySelector(".figure"),"end-"+k,2600);
+  if(k==="angry")anim(stage,"shake",600);
+  if(k==="teta")throwAt(stage,"🩴");
+}
+function poke(stage){anim(stage.querySelector(".figure"),"boing",500);burst(stage,pick(["آي!","بالراحة!","إيه ده؟","😳","متزقش!"]))}
+// Watches the loudness: a sudden shout fires a big reaction, a pause gets a small gag.
+function director(stage,k){
+  let lastShout=0,lastGag=performance.now(),quiet=0;
+  return lvl=>{
+    const t=performance.now();
+    if(lvl>.62&&t-lastShout>1100){lastShout=t;shout(stage,k)}
+    if(lvl<.05){if(!quiet)quiet=t;if(t-quiet>1300&&t-lastGag>3500){lastGag=t;gag(stage,k)}}else quiet=0;
+  };
+}
+let busy=false;   // playing or recording: no idle gags then
+setInterval(()=>{
+  if(busy||document.hidden||!document.getElementById("pyramid").hidden)return;
+  const st=activeStage();if(st&&GAGS[current.c])gag(st,current.c);
+},7000);
 
 let stopPlayback=()=>{};
 function playVoice(data){
   stopPlayback();
   const url=URL.createObjectURL(data.blob||b64ToBlob(data.a,data.t));
   const audio=new Audio();audio.setAttribute("playsinline","");audio.src=url;
-  const ctx=getAC();let stopMouth=null;
+  const fx=FX[data.fx||0]||FX[0],stage=activeStage(),k=data.c;
+  if(fx.rate){audio.preservesPitch=false;audio.mozPreservesPitch=false;audio.webkitPreservesPitch=false;audio.playbackRate=fx.rate}
+  const ctx=getAC();let stopMouth=null,osc=null;
   if(ctx){
     try{
       const src=ctx.createMediaElementSource(audio),an=ctx.createAnalyser();an.fftSize=1024;
-      src.connect(an);an.connect(ctx.destination);
-      stopMouth=driveMouth(an);
+      let out=src;
+      if(fx.robot){const g=ctx.createGain();g.gain.value=0;osc=ctx.createOscillator();osc.frequency.value=50;osc.connect(g.gain);src.connect(g);out=g;osc.start()}
+      out.connect(an);
+      if(fx.echo){const d=ctx.createDelay(1),fb=ctx.createGain(),wet=ctx.createGain();d.delayTime.value=.22;fb.gain.value=.45;wet.gain.value=.6;src.connect(d);d.connect(fb);fb.connect(d);d.connect(wet);wet.connect(an)}
+      an.connect(ctx.destination);
+      stopMouth=driveMouth(an,stage?director(stage,k):null);
     }catch(e){}
   }
   // Without Web Audio, fall back to the plain talking animation.
   if(!stopMouth){stopMouth=()=>{};figs().forEach(f=>f.classList.add("talking"))}
-  const end=()=>{stopMouth();figs().forEach(f=>f.classList.remove("talking"));URL.revokeObjectURL(url)};
+  busy=true;
+  const end=()=>{stopMouth();if(osc)try{osc.stop()}catch(e){}figs().forEach(f=>f.classList.remove("talking"));URL.revokeObjectURL(url);busy=false};
   stopPlayback=()=>{audio.pause();end();stopPlayback=()=>{}};
-  audio.onended=()=>stopPlayback();
+  audio.onended=()=>{stopPlayback();if(stage)finale(stage,k)};
   audio.onerror=()=>{stopPlayback();showPlayError()};
   audio.play().catch(()=>{stopPlayback();showPlayError()});
 }
@@ -444,7 +550,7 @@ function speak(data){
 function play(data){ if(data.a||data.blob)playVoice(data); else speak(data); }
 const canPlay=data=>!!(data.a||data.blob)||("speechSynthesis" in window&&!!data.m);
 
-let current={c:"happy",n:"",m:""};
+let current={c:"happy",n:"",m:"",fx:0};
 
 function buildStage(el,data,withActions){
   el.innerHTML="";
@@ -460,7 +566,7 @@ function buildStage(el,data,withActions){
   fig.style.cssText+="background:none;border:none;padding:0;cursor:pointer";
   fig.setAttribute("aria-label","اسمع الرسالة");
   fig.innerHTML=CHARS[data.c].svg;
-  fig.addEventListener("click",()=>play(data));
+  fig.addEventListener("click",()=>{if(busy)poke(el);else play(data)});
   el.append(beam,pad,fig,scan,bubble);
   if(withActions){
     const a=document.createElement("div");a.className="stage-actions";
@@ -521,7 +627,7 @@ function initSend(){
     catch(e){mr=new MediaRecorder(stream)}
     mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
     mr.onstop=()=>{
-      clearInterval(timer);stopMeter();stopMeter=()=>{};
+      clearInterval(timer);stopMeter();stopMeter=()=>{};busy=false;
       stream.getTracks().forEach(t=>t.stop());
       const dur=Math.min(MAX_SEC,(Date.now()-t0)/1000);
       let type=(mr.mimeType||mime||"audio/webm").split(";")[0];
@@ -534,7 +640,7 @@ function initSend(){
       recTime.textContent=fmt(rec.dur);
       refresh();
     };
-    mr.start(250);t0=Date.now();
+    mr.start(250);t0=Date.now();busy=true;
     recBtn.classList.add("recording");recLabel.textContent="وقّف التسجيل";
     recTime.textContent=fmt(0);recBar.style.width="0%";
     timer=setInterval(()=>{
@@ -543,12 +649,23 @@ function initSend(){
       if(s>=MAX_SEC&&mr.state==="recording")mr.stop();
     },200);
     // Let the preview character mouth along while recording.
-    if(ctx){try{const src=ctx.createMediaStreamSource(stream),an=ctx.createAnalyser();an.fftSize=1024;src.connect(an);stopMeter=driveMouth(an)}catch(e){}}
+    if(ctx){try{const src=ctx.createMediaStreamSource(stream),an=ctx.createAnalyser();an.fftSize=1024;src.connect(an);stopMeter=driveMouth(an,director(document.getElementById("previewStage"),current.c))}catch(e){}}
   }
   recBtn.addEventListener("click",()=>{
     if(mr&&mr.state==="recording")mr.stop(); else startRec();
   });
   document.getElementById("recPlay").addEventListener("click",()=>play(current));
+  const fxs=document.getElementById("fxs");
+  FX.forEach((f,i)=>{
+    const b=document.createElement("button");b.type="button";b.textContent=f.i+" "+f.n;
+    b.setAttribute("aria-pressed",i===current.fx?"true":"false");
+    b.addEventListener("click",()=>{
+      current.fx=i;fxs.querySelectorAll("button").forEach((x,j)=>x.setAttribute("aria-pressed",j===i?"true":"false"));
+      document.getElementById("out").hidden=true;
+      if(rec.blob)play(current);
+    });
+    fxs.append(b);
+  });
   document.getElementById("recAgain").addEventListener("click",()=>{
     stopPlayback();rec.blob=null;rec.ver++;recDone.hidden=true;recBtn.hidden=false;
     recTime.textContent=fmt(0);recBar.style.width="0%";refresh();startRec();
@@ -557,14 +674,14 @@ function initSend(){
   document.getElementById("form").addEventListener("submit",async e=>{
     e.preventDefault();
     if(!rec.blob){recMsg.textContent="سجّل رسالتك الأول.";recBtn.focus();return}
-    const key=JSON.stringify([rec.ver,current.c,current.n,current.m]);
+    const key=JSON.stringify([rec.ver,current.c,current.fx,current.n,current.m]);
     let url=saved&&saved.key===key?saved.url:null;
     if(!url){
       makeBtn.disabled=true;makeBtn.textContent="بنرفع التسجيل…";recMsg.textContent="";
       try{
         const a=await blobToB64(rec.blob);
         if(a.length>MAX_B64)throw new Error("big");
-        const id=await saveMsg({c:current.c,n:current.n,m:current.m,a,t:rec.type.slice(0,60),d:rec.dur});
+        const id=await saveMsg({c:current.c+(current.fx?String(current.fx):""),n:current.n,m:current.m,a,t:rec.type.slice(0,60),d:rec.dur});
         url=linkFor(id);saved={key,url};
       }catch(err){
         recMsg.textContent=err.message==="big"?"التسجيل حجمه كبير، سجّل رسالة أقصر شوية.":"حصلت مشكلة في الرفع. اتأكد من النت وجرب تاني.";
@@ -600,6 +717,9 @@ function initRecv(data){
     route();
   });
   document.getElementById("toPyr").addEventListener("click",openPyramid);
+  document.querySelectorAll("#reacts button").forEach(b=>b.addEventListener("click",()=>{
+    const st=document.getElementById("recvStage");emojis(st,[b.textContent],7);anim(b,"boing",500);
+  }));
   const camBtn=document.getElementById("cam");
   if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia))camBtn.hidden=true;
   camBtn.addEventListener("click",toggleCam);
